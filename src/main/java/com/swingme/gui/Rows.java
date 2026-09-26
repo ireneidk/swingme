@@ -1,7 +1,6 @@
 package com.swingme.gui;
 
 import com.swingme.config.ItemOverride;
-import com.swingme.config.ItemOverrideStore;
 import com.swingme.config.SwingMeConfig;
 
 import java.util.List;
@@ -25,8 +24,6 @@ public final class Rows {
     private static final Predicate<ItemOverride> SWING_ON = o -> !o.disableSwingAnimation;
     private static final Predicate<ItemOverride> SWING_SHAPE_ON =
             o -> !o.disableSwingAnimation && o.enableSwingOverride;
-    /** The camera rows stay out of sight until the drawer's code has been entered. */
-    private static final Predicate<ItemOverride> UNLOCKED = o -> ItemOverrideStore.secretUnlocked();
 
     public static final List<Row> POSITION = List.of(
             new Row.Toggle("enableArmPositionOverride",
@@ -141,13 +138,7 @@ public final class Rows {
             new Row.Toggle("scaleNameTags",
                     o -> SwingMeConfig.scaleNameTags, (o, v) -> SwingMeConfig.scaleNameTags = v, null, false),
             new Row.Slider("groundItemScale", 0.1f, 4f,
-                    o -> SwingMeConfig.groundItemScale, (o, v) -> SwingMeConfig.groundItemScale = v, null, 1f),
-            new Row.Toggle("enablePerspective",
-                    o -> SwingMeConfig.enablePerspective,
-                    (o, v) -> SwingMeConfig.enablePerspective = v, UNLOCKED, false),
-            new Row.Toggle("enableFreeCamera",
-                    o -> SwingMeConfig.enableFreeCamera,
-                    (o, v) -> SwingMeConfig.enableFreeCamera = v, UNLOCKED, false)
+                    o -> SwingMeConfig.groundItemScale, (o, v) -> SwingMeConfig.groundItemScale = v, null, 1f)
     );
 
     public static final List<Row> VIEW = List.of(

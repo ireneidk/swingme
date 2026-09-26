@@ -16,14 +16,13 @@ numbering restarts here and does not continue ScaleMe's history.
 - **Share codes.** Copy a short code for your settings and paste it to a friend, from the overlay
   or with `/swingme code`.
 - **Six themes**, including three light ones.
+- **Presets.** Four ready-made hand and swing setups on the Presets tab: Diggin me, base-swing,
+  Far-chop and Cropper. Click one with Held Item selected to apply it to the item in your hand.
 - **Reset and Undo**, per tab.
 - **Swing tester** with a repeat mode, so you can preview animation settings without attacking.
 - **Nametags scale with your character**, and follow size applied by other mods such as Odin.
 - **Typed values.** Click the number on any slider to enter an exact value, including past the
   slider's range — swing speed drags down to 0.1 but accepts a typed 0.05.
-- **Perspective.** Third person (F5) passes through walls instead of pulling in close.
-- **Free camera.** A keybind that detaches the view: your player stops turning, the mouse orbits a
-  full 360 around your head, and the scroll wheel sets camera distance instead of changing item.
 - **Stop Item Swaying With the Camera.** Holds the held item still while you turn, instead of
   letting it lag behind the view. Under More; it applies to every item rather than per item.
 - **Keyboard editing in number fields.** Ctrl+A selects the typed value, Ctrl+C copies it, and
@@ -47,12 +46,6 @@ numbering restarts here and does not continue ScaleMe's history.
   scales properly.
 - **More is always available.** It used to disappear while the scope switch was on Held Item,
   even though its settings were never per-item. It now stays put in both scopes.
-- **Perspective and Free are hidden** until the unlabelled button at the bottom of the side
-  drawer is clicked and `FREE` is typed into it. The unlock is remembered.
-- **The Free Camera key is set from the SwingMe menu**, on the More tab, and no longer appears
-  under Controls → Miscellaneous. Escape clears it. Because Minecraft only saves keys it lists in
-  that screen, SwingMe stores this one itself, so it survives a restart. Edit Held Item Animation
-  and Sword Block are unchanged and still live under Controls.
 
 ### Removed
 

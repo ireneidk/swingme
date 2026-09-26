@@ -8,7 +8,6 @@
   "client": [
     "AvatarNameTagMixin",
     "AvatarRendererMixin",
-    "CameraMixin",
     "CameraTypeMixin",
     "EntityRenderDispatcherMixin",
     "GuiMixin",
@@ -17,7 +16,6 @@
     "LayerRenderStateMixin",
     "LivingEntityMixin",
     "LocalPlayerMixin",
-    "MouseHandlerMixin",
     "PlayerModelMixin"
   ]
 }

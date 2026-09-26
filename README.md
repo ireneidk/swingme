@@ -63,23 +63,14 @@ The top row holds three groups. **Animation** opens a second row; the other two 
   - **Item** — the held item's own scale, offset and rotation
   - **Swing** — animation speed, arc shape, bobbing, repeated-swing behaviour, sword block
   - **Saved** — every item with its own settings; reset one back to your globals, or remove it
-- **More** — player, other players, NPC and dropped-item scale, nametag resizing, the
-  third-person camera options below, and the crosshair, selfie cam, own nametag and
-  hide-players settings
-- **Presets** — settings that ship with the mod, ready to apply. Empty for now.
+- **More** — player, other players, NPC and dropped-item scale, nametag resizing, and the
+  crosshair, selfie cam, own nametag and hide-players settings
+- **Presets** — settings that ship with the mod: Diggin me, base-swing, Far-chop and Cropper.
+  Pick Held Item and click one to apply it to the item in your hand.
 
 Hover any setting for the same explanation the old config menu gave. **Click the number on any
 slider to type an exact value**, including values past the slider's own range — swing speed slides
 down to 0.1 but accepts a typed 0.05.
-
-### Camera (in More)
-
-- **Perspective** — third person (F5) stops pulling in close when there's a wall behind you; the
-  camera passes through it instead.
-- **Free** — enables the **Free Camera** keybind (*Controls → Miscellaneous*, unbound by default).
-  Press it and your player stops turning while the mouse swings the view a full 360° around your
-  head; the scroll wheel changes camera distance instead of your held item, with no distance limit.
-  Press again to return to how you were looking.
 
 ### The side drawer
 
@@ -111,7 +102,7 @@ as JSON, and `/swingme import <json>` applies them.
 | `/swingme export` | Everything |
 | `/swingme export hand` | Held item: position, size and angle |
 | `/swingme export anim` | Swing animation, including sword block |
-| `/swingme export scale` | Sizes, nametag scaling and the camera options |
+| `/swingme export scale` | Sizes and nametag scaling |
 | `/swingme export view` | Third-person crosshair, selfie cam, hiding players |
 
 Only values you have changed are written, so an export of untouched settings is nearly empty.

@@ -8,6 +8,9 @@ public final class HypixelLocationState {
     private static boolean onHypixel = false;
     private static boolean onSkyblock = false;
     private static boolean inDungeon  = false;
+    private static boolean onOwnIsland = false;
+    /** The Hypixel instance, e.g. {@code mini123A}; null until the first location update. */
+    private static String serverName = null;
 
     private HypixelLocationState() {}
 
@@ -16,6 +19,11 @@ public final class HypixelLocationState {
 
         HypixelPacketEvents.LOCATION_UPDATE.register(packet -> {
             if (!(packet instanceof LocationUpdateS2CPacket location)) return;
+
+            serverName = location.serverName();
+            onOwnIsland = location.map()
+                    .map(map -> map.equals("Private Island") || map.equals("Garden"))
+                    .orElse(false);
 
             onSkyblock = location.serverType()
                     .map("SKYBLOCK"::equals)
@@ -34,9 +42,16 @@ public final class HypixelLocationState {
 
     public static boolean isInDungeon()  { return inDungeon;  }
 
+    /** Your Private Island or Garden, which other players only reach as visitors. */
+    public static boolean isOnOwnIsland() { return onOwnIsland; }
+
+    public static String serverName() { return serverName; }
+
     public static void reset() {
         onHypixel  = false;
         onSkyblock = false;
         inDungeon  = false;
+        onOwnIsland = false;
+        serverName = null;
     }
 }

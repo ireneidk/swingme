@@ -9,7 +9,6 @@ import com.swingme.gui.Theme;
 import com.swingme.util.ActiveSettings;
 import com.swingme.util.BlockingState;
 import com.swingme.util.FeatureFlags;
-import com.swingme.util.FreeCamera;
 import com.swingme.util.HypixelLocationState;
 import com.swingme.util.ItemOverrideResolver;
 import com.swingme.util.SwingHoldState;
@@ -22,6 +21,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Util;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
@@ -34,6 +37,10 @@ public class SwingMe implements ClientModInitializer {
 
     public static final String MOD_ID = "swingme";
     public static final Logger LOGGER = LoggerFactory.getLogger("SwingMe");
+
+    private static final String CREATOR = "Eiryna";
+    /** The Hypixel instance the creator was last announced in, so each lobby says it once. */
+    private static String greetedServer = null;
 
     @Override
     public void onInitializeClient() {
@@ -50,7 +57,6 @@ public class SwingMe implements ClientModInitializer {
         ItemTuneScreen.windowH = ItemOverrideStore.windowH();
         ItemTuneScreen.setPanelOpen(ItemOverrideStore.panelOpen());
         Theme.set(Theme.byName(ItemOverrideStore.theme()));
-        FreeCamera.loadSavedKey();
 
         HypixelNetworking.registerToEvents(
                 Util.make(new Object2IntOpenHashMap<>(), map -> map.put(LocationUpdateS2CPacket.ID, 1))
@@ -63,7 +69,6 @@ public class SwingMe implements ClientModInitializer {
             SwingHoldState.reset();
             ItemOverrideResolver.clear();
             SwingTester.stopRepeat();
-            FreeCamera.reset();
         });
 
         // Registered before the sword-block key so it sits first among this mod's
@@ -89,22 +94,11 @@ public class SwingMe implements ClientModInitializer {
                 SwingHoldState.reset();
                 ItemOverrideResolver.clear();
                 SwingTester.stopRepeat();
-                FreeCamera.reset();
                 return;
             }
 
-            // Turning the option off while the camera is up has to put the view back.
-            if (!FeatureFlags.isEnabled(FeatureFlags.FREE_CAMERA) && FreeCamera.isEngaged()) {
-                FreeCamera.forceExit();
-            }
-
-            while (FreeCamera.KEY.consumeClick()) {
-                if (FeatureFlags.isEnabled(FeatureFlags.FREE_CAMERA)) FreeCamera.toggle();
-            }
-
-            FreeCamera.tick();
-
             ItemOverrideResolver.update(client.player);
+            greetCreator(client);
             ActiveSettings.selectMainHand();
 
             SwingHoldState.update(ActiveSettings.isEnabled(FeatureFlags.SUPPRESS_REPEAT_SWING)
@@ -126,5 +120,20 @@ public class SwingMe implements ClientModInitializer {
         });
 
         Commands.register();
+    }
+
+    private static void greetCreator(Minecraft client) {
+        String server = HypixelLocationState.serverName();
+        if (server == null || server.equals(greetedServer) || HypixelLocationState.isOnOwnIsland()) return;
+        if (client.player.getPlainTextName().equalsIgnoreCase(CREATOR)) return;
+        for (AbstractClientPlayer player : client.level.players()) {
+            if (player.getPlainTextName().equalsIgnoreCase(CREATOR)) {
+                greetedServer = server;
+                client.player.sendSystemMessage(Component.literal(
+                        "Eiryna is here! They made the swing thing ur using :o Say hi!")
+                        .withStyle(ChatFormatting.LIGHT_PURPLE));
+                return;
+            }
+        }
     }
 }

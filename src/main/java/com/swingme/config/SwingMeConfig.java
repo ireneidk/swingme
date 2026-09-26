@@ -283,17 +283,6 @@ public class SwingMeConfig extends MidnightConfig {
     @Entry(category = SCALE, isSlider = true, min = 0.1f, max = 4f, precision = 1000)
     public static float groundItemScale = 1f;
 
-    // ── Camera ──────────────────────────────────────────────────────────────
-
-    @Comment(category = SCALE, centered = true)
-    public static Comment spacer8;
-
-    @Entry(category = SCALE)
-    public static boolean enablePerspective = false;
-
-    @Entry(category = SCALE)
-    public static boolean enableFreeCamera = false;
-
     // ════ Camera & Crosshair ════════════════════════════════════════════════
 
     @Comment(category = VIEW)

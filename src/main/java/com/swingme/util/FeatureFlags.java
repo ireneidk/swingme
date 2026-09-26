@@ -45,8 +45,6 @@ public final class FeatureFlags {
     public static final int HIDE_PLAYERS             = 1 << 15;
     public static final int HIDE_PLAYERS_SB_ONLY     = 1 << 16;
     public static final int GROUND_ITEM_SCALE        = 1 << 17;
-    public static final int PERSPECTIVE              = 1 << 20;
-    public static final int FREE_CAMERA              = 1 << 21;
     public static final int DISABLE_CAMERA_SWAY      = 1 << 22;
 
     private static int flags = 0;
@@ -71,8 +69,7 @@ public final class FeatureFlags {
         if (SwingMeConfig.hidePlayers)                    f |= HIDE_PLAYERS;
         if (SwingMeConfig.hidePlayersOnlyOnSkyblock)      f |= HIDE_PLAYERS_SB_ONLY;
 
-        if (SwingMeConfig.enablePerspective)              f |= PERSPECTIVE;
-        if (SwingMeConfig.enableFreeCamera)               f |= FREE_CAMERA;
+        if (SwingMeConfig.disableCameraSway)              f |= DISABLE_CAMERA_SWAY;
 
         flags = f;
     }

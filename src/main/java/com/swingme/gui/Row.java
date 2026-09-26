@@ -1,12 +1,9 @@
 package com.swingme.gui;
 
 import com.swingme.config.ItemOverride;
-import com.mojang.blaze3d.platform.InputConstants;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.language.I18n;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -318,89 +315,6 @@ public abstract class Row {
         @Override
         public float max() {
             return max;
-        }
-    }
-
-    // -- Key bind -----------------------------------------------------------
-
-    /**
-     * A row that binds a {@link KeyMapping}.
-     * <p>
-     * Presentation only: it is never put in a {@code Rows} table, because the share-code registry
-     * is built from those and a key is not a settings value anyone would want in a code.
-     */
-    public static class KeyBind extends Row {
-        private static final int BTN_W = 60;
-        private static final int BTN_H = 12;
-
-        private final KeyMapping mapping;
-        private final Consumer<InputConstants.Key> onBind;
-        private boolean listening = false;
-
-        /** @param onBind applies and persists the new key; see {@code FreeCamera.bind}. */
-        public KeyBind(String fieldName, KeyMapping mapping, Consumer<InputConstants.Key> onBind) {
-            super(fieldName, null);
-            this.mapping = mapping;
-            this.onBind = onBind;
-        }
-
-        public boolean isListening() {
-            return listening;
-        }
-
-        public void listen() {
-            listening = true;
-        }
-
-        public void stopListening() {
-            listening = false;
-        }
-
-        /** Binds {@code key} and stops listening. Escape arrives here as {@code UNKNOWN}, unbinding. */
-        public void bind(InputConstants.Key key) {
-            listening = false;
-            onBind.accept(key);
-        }
-
-        @Override
-        public void draw(GuiGraphicsExtractor g, int x, int y, int w, ItemOverride o) {
-            Draw.text(g, label(), x, y + 2, Theme.current().label());
-            int bx = x + w - BTN_W;
-            g.fill(bx, y, bx + BTN_W, y + BTN_H,
-                    listening ? Theme.current().buttonOn() : Theme.current().button());
-            String shown = listening
-                    ? "> ... <"
-                    : mapping.getTranslatedKeyMessage().getString();
-            Draw.centered(g, shown, bx + BTN_W / 2, y + 2, Theme.current().text());
-        }
-
-        @Override
-        public boolean click(double mx, double my, int x, int y, int w, ItemOverride o) {
-            return my >= y && my < y + ROW_HEIGHT && mx >= x + w - BTN_W && mx < x + w;
-        }
-
-        @Override
-        public Object get(ItemOverride o) {
-            return mapping.saveString();
-        }
-
-        @Override
-        public void set(ItemOverride o, Object value) {
-            try {
-                bind(InputConstants.getKey((String) value));
-            } catch (IllegalArgumentException e) {
-                bind(InputConstants.UNKNOWN);
-            }
-        }
-
-        @Override
-        public Object defaultValue() {
-            return InputConstants.UNKNOWN.getName();
-        }
-
-        @Override
-        public boolean isFloat() {
-            return false;
         }
     }
 

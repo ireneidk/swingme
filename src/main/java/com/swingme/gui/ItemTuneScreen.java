@@ -2,11 +2,9 @@ package com.swingme.gui;
 
 import com.swingme.config.ItemOverride;
 import com.swingme.config.ItemOverrideStore;
-import com.swingme.util.FreeCamera;
 import com.swingme.util.ShareCode;
 import com.swingme.util.SwingTester;
 
-import com.mojang.blaze3d.platform.InputConstants;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -59,13 +57,14 @@ public class ItemTuneScreen extends Screen {
 
     private static final int SAVED_ROW_H = 20;
     private static final int SMALL_BTN_W = 44;
+    private static final int PRESET_ROW_H = 20;
     private static final int SMALL_BTN_H = 12;
 
     /** The expanding side drawer holding the actions that are not needed every second. */
     private static final int PANEL_W = 84;
     private static final int PANEL_GAP = 2;
     private static final int PANEL_BTN_W = PANEL_W - 8;
-    private static final int PANEL_ROWS = 5;
+    private static final int PANEL_ROWS = 4;
     private static final int PANEL_H = PANEL_ROWS * (BTN_H + 4) + 4;
     /** Width of the square arrow button in the title bar that opens the drawer. */
     private static final int ARROW_W = 12;
@@ -75,8 +74,20 @@ public class ItemTuneScreen extends Screen {
     /** How long a copy/paste result stays on screen. */
     private static final long STATUS_MS = 3000L;
 
-    /** Typed into the drawer's unlabelled button to reveal the camera settings. */
-    private static final String SECRET = "FREE";
+    /** Held-item share codes, applied exactly as if pasted. */
+    private record Preset(String name, String code) {}
+
+    private static final List<Preset> PRESETS = List.of(
+            new Preset("Diggin me",
+                    "5085XN16NC6JXH75JAJS44CFS1P5G7778Z2E44CAH7Z3GPQEVTZR4011G04A00HG02B039M017DN7WZG"),
+            new Preset("base-swing",
+                    "50870G15WR6CK17ZYAJRK4CBF9P6J78JN133754JXQNZG3VA3008M0132HWP00K802F00FXH"),
+            new Preset("Far-chop",
+                    "5086WF15CM6CK17ZYAJRTPCG7SPCV78SN13372PYXQNZG3QP3008M0132AWP00K802F00FWX"),
+            new Preset("Cropper",
+                    "5086GS156M6CK17ZYAJSB6CMD1PWP78GRZ4844A6W003PYQY0GX8C012G04DHZJR02D009W019ZTC00")
+    );
+
 
     /** Persisted between openings; written to disk by {@link ItemOverrideStore}. */
     public static int windowX = 40;
@@ -115,25 +126,14 @@ public class ItemTuneScreen extends Screen {
     }
 
     /**
-     * The only place the free-camera key can be bound, since it is kept out of the vanilla
-     * controls list. Shown whether or not the camera settings themselves are unlocked.
-     */
-    private static final Row.KeyBind FREE_CAMERA_BIND =
-            new Row.KeyBind("freeCameraKey", FreeCamera.KEY, FreeCamera::bind);
-
-    /**
-     * The Sizes and Camera rows share one tab, so this is the pair read back to back, with the
-     * bind row between them where the camera settings appear once unlocked.
+     * The Sizes and View rows share one tab, so this is the pair read back to back.
      * <p>
      * A view over the two tables, deliberately not a table of its own: {@code ShareCode}'s
      * registry is built from {@code Rows.SCALE} and {@code Rows.VIEW} in that order, and every
-     * code in circulation is indexed by it. Merging the tabs is presentation only, which is also
-     * what lets the bind row sit here without entering that registry.
+     * code in circulation is indexed by it. Merging the tabs is presentation only.
      */
-    private static final List<Row> MORE_ROWS = Stream.of(
-            Rows.SCALE.stream(), Stream.of((Row) FREE_CAMERA_BIND), Rows.VIEW.stream())
-            .flatMap(stream -> stream)
-            .toList();
+    private static final List<Row> MORE_ROWS =
+            Stream.concat(Rows.SCALE.stream(), Rows.VIEW.stream()).toList();
 
     /**
      * Stand-in target for the More rows, which read {@code SwingMeConfig} and ignore this
@@ -162,11 +162,6 @@ public class ItemTuneScreen extends Screen {
     private Row draggedRow = null;
     /** The row whose value is being typed, or null. */
     private Row.Slider editingRow = null;
-    /** The key-bind row waiting for a keypress, or null. */
-    private Row.KeyBind listeningRow = null;
-
-    /** Non-null while the drawer's code is being typed; holds what has been typed so far. */
-    private String secretBuffer = null;
 
     /** Rebuilt every frame while drawing; drawn last so it sits above the window. */
     private String hoverTooltip = "";
@@ -224,7 +219,6 @@ public class ItemTuneScreen extends Screen {
     @Override
     public void onClose() {
         commitEdit();
-        cancelCapture();
         ItemOverrideStore.setWindowPos(windowX, windowY);
         ItemOverrideStore.setWindowSize(windowW, windowH);
         ItemOverrideStore.setPanelOpen(panelOpen);
@@ -275,7 +269,7 @@ public class ItemTuneScreen extends Screen {
         if (showingSaved()) {
             drawSaved(g, mouseX, mouseY);
         } else if (showingPresets()) {
-            drawCentredNotice(g, I18n.get("swingme.tune.noPresets"));
+            drawPresets(g, mouseX, mouseY);
         } else {
             drawContent(g, mouseX, mouseY);
         }
@@ -391,6 +385,23 @@ public class ItemTuneScreen extends Screen {
         g.disableScissor();
     }
 
+    private void drawPresets(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        Theme t = Theme.current();
+        g.enableScissor(windowX, contentTop(), windowX + windowW, contentBottom());
+        int y = contentTop() - scroll;
+        for (Preset preset : PRESETS) {
+            if (y + PRESET_ROW_H >= contentTop() && y <= contentBottom()) {
+                boolean hover = isOverContent(mouseX, mouseY)
+                        && inRect(mouseX, mouseY, rowX(), y + 2, rowW(), BTN_H);
+                g.fill(rowX(), y + 2, rowX() + rowW(), y + 2 + BTN_H, hover ? t.buttonHover() : t.button());
+                Draw.centered(g, preset.name(), rowX() + rowW() / 2, y + 6, t.text());
+                if (hover) hoverTooltip = I18n.get("swingme.tune.preset.tooltip");
+            }
+            y += PRESET_ROW_H;
+        }
+        g.disableScissor();
+    }
+
     /** Swing, Repeat and the scope switch — the three things you reach for constantly. */
     private void drawFooter(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         Theme t = Theme.current();
@@ -438,27 +449,24 @@ public class ItemTuneScreen extends Screen {
         g.fill(px, py, px + PANEL_W, py + PANEL_H, t.panel());
 
         boolean canUndo = canUndo();
-        boolean typing = secretBuffer != null;
         String[] labels = {
                 I18n.get(canUndo ? "swingme.tune.undo" : "swingme.tune.resetTab"),
                 I18n.get("swingme.tune.copyCode"),
                 I18n.get("swingme.tune.pasteCode"),
-                I18n.get(Theme.current().key()),
-                typing ? secretBuffer + "_" : I18n.get("swingme.tune.secret")
+                I18n.get(Theme.current().key())
         };
         String[] tips = {
                 canUndo ? "swingme.tune.undo.tooltip" : "swingme.tune.resetTab.tooltip",
                 "swingme.tune.copyCode.tooltip",
                 "swingme.tune.pasteCode.tooltip",
-                "swingme.tune.theme.tooltip",
-                "swingme.tune.secret.tooltip"
+                "swingme.tune.theme.tooltip"
         };
 
         for (int i = 0; i < PANEL_ROWS; i++) {
             int bx = px + 4;
             int by = panelButtonY(i);
             boolean hover = inRect(mouseX, mouseY, bx, by, PANEL_BTN_W, BTN_H);
-            int color = (i == 0 && canUndo) || (i == 4 && typing)
+            int color = i == 0 && canUndo
                     ? t.buttonUndo()
                     : (hover ? t.buttonHover() : t.button());
             g.fill(bx, by, bx + PANEL_BTN_W, by + BTN_H, color);
@@ -720,12 +728,15 @@ public class ItemTuneScreen extends Screen {
     }
 
     private void pasteCode() {
+        applyCode(Minecraft.getInstance().keyboardHandler.getClipboard());
+    }
+
+    private void applyCode(String code) {
         ItemOverride o = EditScope.target();
         if (o == null) {
             setStatus(I18n.get("swingme.tune.status.noTarget"));
             return;
         }
-        String code = Minecraft.getInstance().keyboardHandler.getClipboard();
         ShareCode.Result result =
                 ShareCode.apply(code, o, EditScope.mode() == EditScope.Mode.HELD_ITEM);
         if (!result.ok) {
@@ -760,18 +771,6 @@ public class ItemTuneScreen extends Screen {
      */
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (listeningRow != null) {
-            Row.KeyBind bind = listeningRow;
-            listeningRow = null;
-            // Escape unbinds rather than cancelling, matching the vanilla controls screen.
-            bind.bind(event.key() == GLFW.GLFW_KEY_ESCAPE
-                    ? InputConstants.UNKNOWN
-                    : InputConstants.getKey(event));
-            return true;
-        }
-
-        if (secretBuffer != null) return typeSecret(event);
-
         if (event.isCycleFocus()) {
             cycleField(event.hasShiftDown());
             return true;
@@ -821,45 +820,6 @@ public class ItemTuneScreen extends Screen {
         if (key == GLFW.GLFW_KEY_PERIOD || key == GLFW.GLFW_KEY_KP_DECIMAL) return '.';
         if (key == GLFW.GLFW_KEY_MINUS || key == GLFW.GLFW_KEY_KP_SUBTRACT) return '-';
         return 0;
-    }
-
-    /** Accumulates the drawer code. An exact match unlocks immediately, with no Enter needed. */
-    private boolean typeSecret(KeyEvent event) {
-        int key = event.key();
-        if (key == GLFW.GLFW_KEY_ESCAPE) {
-            cancelCapture();
-            return true;
-        }
-        if (key == GLFW.GLFW_KEY_BACKSPACE) {
-            if (!secretBuffer.isEmpty()) {
-                secretBuffer = secretBuffer.substring(0, secretBuffer.length() - 1);
-            }
-            return true;
-        }
-        if (key >= GLFW.GLFW_KEY_A && key <= GLFW.GLFW_KEY_Z
-                && secretBuffer.length() < SECRET.length()) {
-            secretBuffer += (char) ('A' + key - GLFW.GLFW_KEY_A);
-            if (secretBuffer.equals(SECRET)) {
-                secretBuffer = null;
-                ItemOverrideStore.setSecretUnlocked(true);
-                setStatus(I18n.get("swingme.tune.status.unlocked"));
-            }
-        }
-        return true;
-    }
-
-    /** Reached only from a drawer click, which has already dropped any other pending edit. */
-    private void beginSecret() {
-        secretBuffer = "";
-    }
-
-    /** Drops a half-typed code and a pending bind, the way clicking away from a field does. */
-    private void cancelCapture() {
-        secretBuffer = null;
-        if (listeningRow != null) {
-            listeningRow.stopListening();
-            listeningRow = null;
-        }
     }
 
     // -- Field focus --------------------------------------------------------
@@ -948,7 +908,6 @@ public class ItemTuneScreen extends Screen {
 
         // Clicking anywhere else accepts what was typed, the way a text field loses focus.
         commitEdit();
-        cancelCapture();
 
         // The drawer floats outside the window, so it gets first refusal.
         if (panelOpen && clickPanel(mx, my)) return true;
@@ -993,6 +952,9 @@ public class ItemTuneScreen extends Screen {
             if (showingSaved()) {
                 return clickSaved(mx, my);
             }
+            if (showingPresets()) {
+                return clickPresets(my);
+            }
             ItemOverride o = rowTarget();
             if (o != null) {
                 int y = contentTop() - scroll;
@@ -1002,12 +964,6 @@ public class ItemTuneScreen extends Screen {
                             && slider.clickedValue(mx, my, rowX(), y, rowW())) {
                         slider.beginEdit(o);
                         editingRow = slider;
-                        return true;
-                    }
-                    if (row instanceof Row.KeyBind bind
-                            && bind.click(mx, my, rowX(), y, rowW(), o)) {
-                        bind.listen();
-                        listeningRow = bind;
                         return true;
                     }
                     if (row.click(mx, my, rowX(), y, rowW(), o)) {
@@ -1083,11 +1039,10 @@ public class ItemTuneScreen extends Screen {
                 }
                 case 1 -> copyCode();
                 case 2 -> pasteCode();
-                case 3 -> {
+                default -> {
                     Theme.set(Theme.next());
                     ItemOverrideStore.setTheme(Theme.current().name());
                 }
-                default -> beginSecret();
             }
             return true;
         }
@@ -1115,6 +1070,18 @@ public class ItemTuneScreen extends Screen {
                 }
             }
             y += SAVED_ROW_H;
+        }
+        return false;
+    }
+
+    private boolean clickPresets(double my) {
+        int y = contentTop() - scroll;
+        for (Preset preset : PRESETS) {
+            if (my >= y + 2 && my < y + 2 + BTN_H) {
+                applyCode(preset.code());
+                return true;
+            }
+            y += PRESET_ROW_H;
         }
         return false;
     }
@@ -1238,6 +1205,8 @@ public class ItemTuneScreen extends Screen {
         int contentHeight;
         if (showingSaved()) {
             contentHeight = savedEntries().size() * SAVED_ROW_H;
+        } else if (showingPresets()) {
+            contentHeight = PRESETS.size() * PRESET_ROW_H;
         } else {
             ItemOverride o = rowTarget();
             if (o == null) return 0;

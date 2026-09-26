@@ -34,9 +34,6 @@ public final class ItemOverrideStore {
         int windowH = 250;
         String theme = "DARK";
         boolean panelOpen = false;
-        boolean secretUnlocked = false;
-        /** The free-camera key as {@code KeyMapping.saveString()}; empty means never bound here. */
-        String freeCameraKey = "";
         Map<String, ItemOverride> overrides = new LinkedHashMap<>();
     }
 
@@ -145,26 +142,6 @@ public final class ItemOverrideStore {
     public static void setPanelOpen(boolean open) {
         if (data.panelOpen == open) return;
         data.panelOpen = open;
-        markDirty();
-    }
-
-    public static boolean secretUnlocked() { return data.secretUnlocked; }
-
-    public static void setSecretUnlocked(boolean unlocked) {
-        if (data.secretUnlocked == unlocked) return;
-        data.secretUnlocked = unlocked;
-        markDirty();
-    }
-
-    /**
-     * The free-camera keybind is not registered with the vanilla controls list, so
-     * {@code options.txt} never sees it and this file is what makes it survive a restart.
-     */
-    public static String freeCameraKey() { return data.freeCameraKey == null ? "" : data.freeCameraKey; }
-
-    public static void setFreeCameraKey(String saveString) {
-        if (saveString.equals(data.freeCameraKey)) return;
-        data.freeCameraKey = saveString;
         markDirty();
     }
 }
