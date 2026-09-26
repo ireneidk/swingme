@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "swingme",
+  "version": "${version}",
+  "name": "SwingMe",
+  "description": "Per-item held-item and swing animation tuning for Hypixel SkyBlock, with an in-game overlay. Fork of ScaleMe by Kd_Gaming1.",
+  "authors": [
+    "ireneidk"
+  ],
+  "contact": {
+    "homepage": "https://github.com/ireneidk/swingme",
+    "sources": "https://github.com/ireneidk/swingme",
+    "issues": "https://github.com/ireneidk/swingme/issues"
+  },
+  "license":"GNU General Public License v3.0",
+  "icon": "assets/swingme/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.swingme.SwingMe"
+    ],
+    "modmenu": [
+      "com.swingme.gui.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "swingme.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabricloader}",
+    "minecraft": "${minecraft}",
+    "fabric-api": ">=${fabric_api}",
+    "midnightlib": ">=${midnightlib}"
+  },
+  "contributors": [
+    "Kd_Gaming1 (original ScaleMe)"
+  ]
+}

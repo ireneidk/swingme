@@ -1,0 +1,10 @@
+* text=auto
+
+# Must stay LF: CI runs this through bash on ubuntu, where CRLF breaks the shebang.
+gradlew text eol=lf
+
+# Windows-only, must stay CRLF.
+gradlew.bat text eol=crlf
+
+*.jar   binary
+*.png   binary

@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "package": "com.swingme.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "AvatarNameTagMixin",
+    "AvatarRendererMixin",
+    "CameraMixin",
+    "CameraTypeMixin",
+    "EntityRenderDispatcherMixin",
+    "GuiMixin",
+    "ItemEntityRendererMixin",
+    "ItemInHandRendererMixin",
+    "LayerRenderStateMixin",
+    "LivingEntityMixin",
+    "LocalPlayerMixin",
+    "MouseHandlerMixin",
+    "PlayerModelMixin"
+  ]
+}
